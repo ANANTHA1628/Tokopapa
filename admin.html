@@ -14,6 +14,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Toko Bangunan Roedie</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Cek apakah user sudah login
+        if (!sessionStorage.getItem('isAuthenticated')) {
+            window.location.href = 'login.html';
+        }
+        
+        // Fungsi logout
+        function logout() {
+            sessionStorage.removeItem('isAuthenticated');
+            window.location.href = 'login.html';
+        }
+    </script>
     <style>
         /* Tab Styles */
         .admin-tabs {
@@ -203,8 +215,11 @@
 <body>
     <!-- ===== HEADER ADMIN ===== -->
     <header>
-        <div class="container">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
             <h1>Admin Dashboard</h1>
+            <button onclick="logout()" style="padding: 8px 16px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
             <a href="index.html" class="btn">Kembali ke Toko</a>
         </div>
     </header>
@@ -215,6 +230,7 @@
         <div class="admin-tabs">
             <button class="tab-btn active" data-tab="produk">Kelola Produk</button>
             <button class="tab-btn" data-tab="halaman">Kelola Halaman</button>
+            <button class="tab-btn" data-tab="pengaturan">Pengaturan Akun</button>
             <button class="tab-btn" data-tab="riwayat">Riwayat Transaksi</button>
         </div>
 
@@ -363,6 +379,40 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ===== TAB PENGATURAN AKUN ===== -->
+            <div id="pengaturan-tab" class="tab-pane">
+                <h2><i class="fas fa-user-cog"></i> Pengaturan Akun</h2>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="currentUsername">Username Saat Ini</label>
+                        <input type="text" id="currentUsername" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newUsername">Username Baru</label>
+                        <input type="text" id="newUsername" class="form-control" placeholder="Masukkan username baru">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentPassword">Password Saat Ini</label>
+                        <input type="password" id="currentPassword" class="form-control" placeholder="Masukkan password saat ini">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword">Password Baru</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="Masukkan password baru">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Konfirmasi Password Baru</label>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Konfirmasi password baru">
+                    </div>
+                    
+                    <button id="saveSettings" class="btn"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    <div id="settingsMessage" style="margin-top: 15px; display: none;"></div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -401,6 +451,139 @@
     </footer>
 
     <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // Fungsi untuk menampilkan username saat ini
+        function loadCurrentUser() {
+            document.getElementById('currentUsername').value = localStorage.getItem('adminUsername') || 'admin';
+        }
+
+        // Fungsi untuk menyimpan pengaturan akun
+        function saveAccountSettings() {
+            const currentUsername = localStorage.getItem('adminUsername');
+            const currentPassword = localStorage.getItem('adminPassword');
+            
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const currentPasswordInput = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const messageElement = document.getElementById('settingsMessage');
+            
+            // Validasi password saat ini
+            if (currentPasswordInput !== currentPassword) {
+                showMessage('Password saat ini salah!', 'error');
+                return;
+            }
+            
+            // Validasi konfirmasi password baru
+            if (newPassword && newPassword !== confirmPassword) {
+                showMessage('Konfirmasi password baru tidak cocok!', 'error');
+                return;
+            }
+            
+            // Update username jika diisi
+            if (newUsername) {
+                localStorage.setItem('adminUsername', newUsername);
+            }
+            
+            // Update password jika diisi
+            if (newPassword) {
+                localStorage.setItem('adminPassword', newPassword);
+            }
+            
+            // Reset form
+            document.getElementById('newUsername').value = '';
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Perbarui tampilan username
+            loadCurrentUser();
+            
+            showMessage('Pengaturan akun berhasil diperbarui!', 'success');
+        }
+        
+        // Fungsi untuk menampilkan pesan
+        function showMessage(message, type) {
+            const messageElement = document.getElementById('settingsMessage');
+            messageElement.textContent = message;
+            messageElement.className = type;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load current username
+            loadCurrentUser();
+            
+            // Handle save settings button
+            document.getElementById('saveSettings').addEventListener('click', saveAccountSettings);
+        });
+    </script>
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: #3182ce;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #2c5282;
+        }
+        
+        .success {
+            color: #38a169;
+            background: #f0fff4;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #38a169;
+        }
+        
+        .error {
+            color: #e53e3e;
+            background: #fff5f5;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #e53e3e;
+        }
+    </style>
     <script src="script.js"></script>
+    <script src="script-new.js"></script>
 </body>
 </html>

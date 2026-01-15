@@ -1,7 +1,5 @@
-// Inisialisasi variabel global
-let products = [];
-let cart = [];
-let orderHistory = [];
+// Menggunakan variabel global yang sudah dideklarasikan di script.js
+// products, cart, dan orderHistory sudah tersedia di scope global
 
 // Fungsi untuk membuat placeholder gambar SVG
 const createPlaceholderImage = (text) => {
