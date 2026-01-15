@@ -1,0 +1,630 @@
+<!-- 
+    ===========================================
+        HALAMAN ADMIN TOKO BANGUNAN ROEDIE
+    ===========================================
+    File: admin.html
+    Deskripsi: Halaman admin untuk mengelola toko
+    ===========================================
+-->
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<!-- ===== BAGIAN HEAD ===== -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Toko Bangunan Roedie</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Tab Styles */
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0;
+            gap: 5px;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-bottom: none;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            font-size: 14px;
+            color: #555;
+            transition: all 0.2s ease;
+            margin: 0;
+        }
+        .tab-btn:hover {
+            background: #e9e9e9;
+        }
+        .tab-btn.active {
+            background: #fff;
+            color: #1a73e8;
+            border-color: #e0e0e0;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+            font-weight: 500;
+        }
+        .tab-pane {
+            display: none;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+        .admin-form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .admin-form h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .admin-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 120px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #444;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="tel"],
+        .form-group input[type="email"],
+        .form-group input[type="date"],
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* Styling untuk riwayat transaksi */
+        .filter-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+        
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .order-table th, 
+        .order-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .order-table th {
+            background-color: #f5f7fa;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .order-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-completed {
+            background-color: #e6fffa;
+            color: #0d9488;
+        }
+        
+        .status-pending {
+            background-color: #fff7ed;
+            color: #f97316;
+        }
+        
+        .status-cancelled {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .btn-view {
+            background-color: #4299e1;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background-color: #3182ce;
+        }
+        
+        .btn-print {
+            background-color: #48bb78;
+            color: white;
+            margin-left: 5px;
+        }
+        
+        .btn-print:hover {
+            background-color: #38a169;
+        }
+        
+        .no-orders {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<!-- ===== BAGIAN BODY ===== -->
+<body>
+    <!-- ===== HEADER ADMIN ===== -->
+    <header>
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <a href="index.html" class="btn">Kembali ke Toko</a>
+        </div>
+    </header>
+
+    <!-- ===== KONTEN UTAMA ===== -->
+    <main class="container">
+        <!-- ===== NAVIGASI TAB ===== -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="produk">Kelola Produk</button>
+            <button class="tab-btn" data-tab="halaman">Kelola Halaman</button>
+            <button class="tab-btn" data-tab="riwayat">Riwayat Transaksi</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- ===== TAB PRODUK ===== -->
+            <div id="produk-tab" class="tab-pane active">
+                <section class="admin-section">
+                    <h2>Kelola Produk</h2>
+            
+            <div class="admin-form">
+                <h3>Tambah Produk Baru</h3>
+                <form id="add-product-form">
+                    <div class="form-group">
+                        <label for="product-name">Nama Produk:</label>
+                        <input type="text" id="product-name" name="product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Harga (Rp):</label>
+                        <input type="number" id="product-price" name="product-price" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock">Stok:</label>
+                        <input type="number" id="product-stock" name="product-stock" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-image">Gambar Produk (URL):</label>
+                        <input type="url" id="product-image" name="product-image" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <button type="submit" class="btn">Tambah Produk</button>
+                </form>
+            </div>
+
+            <div class="product-list">
+                <div class="search-container" style="margin-bottom: 20px;">
+                    <h3 style="display: inline-block; margin-right: 15px;">Daftar Produk</h3>
+                    <div class="form-group" style="display: inline-block; width: 300px;">
+                        <input type="text" id="search-admin" class="form-control" placeholder="Cari produk..." style="padding: 8px; width: 100%;">
+                    </div>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-list">
+                        <!-- Daftar produk akan dimuat di sini -->
+                    </tbody>
+                </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ===== TAB HALAMAN ===== -->
+            <div id="halaman-tab" class="tab-pane">
+                <section class="admin-section">
+                    <h2>Kelola Halaman</h2>
+                    
+                    <div class="admin-form">
+                        <h3>Tentang Kami</h3>
+                        <form id="about-form">
+                            <div class="form-group">
+                                <label for="about-content">Isi Halaman:</label>
+                                <textarea id="about-content" name="about-content" rows="8" required></textarea>
+                            </div>
+                            <button type="submit" class="btn">Simpan Perubahan</button>
+                        </form>
+                    </div>
+
+                    <div class="admin-form" style="margin-top: 30px;">
+                        <h3>Kontak</h3>
+                        <form id="contact-form">
+                            <div class="form-group">
+                                <label for="contact-address">Alamat:</label>
+                                <input type="text" id="contact-address" name="contact-address" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone">Telepon:</label>
+                                <input type="tel" id="contact-phone" name="contact-phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">Email:</label>
+                                <input type="email" id="contact-email" name="contact-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-hours">Jam Operasional:</label>
+                                <input type="text" id="contact-hours" name="contact-hours" placeholder="Contoh: Senin - Jumat, 08:00 - 17:00" required>
+                            </div>
+                            <button type="submit" class="btn">Simpan Perubahan</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Riwayat Transaksi -->
+            <div id="riwayat-tab" class="tab-pane">
+                <div class="admin-form">
+                    <h3>Riwayat Transaksi</h3>
+                    <div class="filter-controls">
+                        <div class="form-group">
+                            <label for="search-order">Cari Pesanan:</label>
+                            <input type="text" id="search-order" placeholder="Cari ID atau nama produk..." class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="filter-date">Filter Tanggal:</label>
+                            <input type="date" id="filter-date" class="form-control">
+                        </div>
+                        <button id="export-excel" class="btn"><i class="fas fa-file-excel"></i> Ekspor ke Excel</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="order-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tanggal</th>
+                                    <th>Jumlah Item</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-history">
+                                <!-- Riwayat transaksi akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== MODAL EDIT PRODUK ===== -->
+    <div id="edit-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Produk</h2>
+            <form id="edit-product-form">
+                <input type="hidden" id="edit-product-id">
+                <div class="form-group">
+                    <label for="edit-product-name">Nama Produk:</label>
+                    <input type="text" id="edit-product-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-price">Harga (Rp):</label>
+                    <input type="number" id="edit-product-price" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-stock">Stok:</label>
+                    <input type="number" id="edit-product-stock" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-image">Gambar Produk (URL):</label>
+                    <input type="url" id="edit-product-image" placeholder="https://example.com/image.jpg">
+                </div>
+                <button type="submit" class="btn">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; Toko Bangunan Roedie - Admin Panel</p>
+        </div>
+    </footer>
+
+    <!-- Load script.js terlebih dahulu -->
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+    /* ===========================================
+       INISIALISASI FUNGSI GLOBAL
+       =========================================== */
+        // Pastikan fungsi-fungsi yang diperlukan tersedia di global scope
+        window.loadProducts = function() {
+            console.log('Memuat produk...');
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const productsList = document.getElementById('products-list');
+            
+            if (!productsList) {
+                console.error('Element dengan id "products-list" tidak ditemukan');
+                return;
+            }
+            
+            if (products.length === 0) {
+                productsList.innerHTML = '<tr><td colspan="5" class="text-center">Tidak ada produk</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            products.forEach((product, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${product.name || 'N/A'}</td>
+                        <td>Rp ${(product.price || 0).toLocaleString('id-ID')}</td>
+                        <td>${product.stock || 0}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editProduct(${product.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteProduct(${product.id})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            productsList.innerHTML = html;
+        };
+        
+        // Fungsi untuk menangani tab
+        function initTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Sembunyikan semua tab pane
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.remove('active');
+                    });
+                    
+                    // Nonaktifkan semua tombol tab
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Tampilkan tab yang dipilih
+                    const tabPane = document.getElementById(tabId + '-tab');
+                    if (tabPane) {
+                        tabPane.classList.add('active');
+                        this.classList.add('active');
+                        
+                        // Muat konten tab yang sesuai
+                        if (tabId === 'riwayat') {
+                            if (typeof loadOrderHistory === 'function') {
+                                loadOrderHistory();
+                            }
+                        } else if (tabId === 'produk') {
+                            loadProducts();
+                        }
+                    }
+                });
+            });
+            
+            // Aktifkan tab pertama
+            const firstTab = document.querySelector('.tab-btn');
+            if (firstTab) firstTab.click();
+        }
+        
+        /* ===========================================
+           INISIALISASI SAAT DOKUMEN SIAP
+           =========================================== */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi tab
+            initTabs();
+            
+            // Muat data produk
+            loadProducts();
+            
+            // Inisialisasi form tambah produk
+            const addProductForm = document.getElementById('add-product-form');
+            if (addProductForm) {
+                addProductForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const nameInput = document.getElementById('product-name');
+                    const priceInput = document.getElementById('product-price');
+                    const stockInput = document.getElementById('product-stock');
+                    const imageInput = document.getElementById('product-image');
+                    
+                    if (!nameInput.value || !priceInput.value || !stockInput.value) {
+                        alert('Mohon isi semua field yang diperlukan');
+                        return;
+                    }
+                    
+                    const products = JSON.parse(localStorage.getItem('products')) || [];
+                    
+                    const newProduct = {
+                        id: Date.now(),
+                        name: nameInput.value,
+                        price: parseInt(priceInput.value) || 0,
+                        stock: parseInt(stockInput.value) || 0,
+                        image: imageInput.value || 'https://via.placeholder.com/300x200?text=Produk'
+                    };
+                    
+                    products.push(newProduct);
+                    localStorage.setItem('products', JSON.stringify(products));
+                    
+                    // Reset form
+                    addProductForm.reset();
+                    
+                    // Perbarui tampilan
+                    loadProducts();
+                    
+                    alert('Produk berhasil ditambahkan');
+                });
+            }
+        });
+        
+        // Fungsi untuk mengedit produk
+        window.editProduct = function(id) {
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const product = products.find(p => p.id === id);
+            
+            if (!product) {
+                alert('Produk tidak ditemukan');
+                return;
+            }
+            
+            const newName = prompt('Nama Produk:', product.name);
+            if (newName === null) return;
+            
+            const newPrice = prompt('Harga:', product.price);
+            if (newPrice === null) return;
+            
+            const newStock = prompt('Stok:', product.stock);
+            if (newStock === null) return;
+            
+            // Update produk
+            product.name = newName;
+            product.price = parseInt(newPrice) || 0;
+            product.stock = parseInt(newStock) || 0;
+            
+            // Simpan perubahan
+            localStorage.setItem('products', JSON.stringify(products));
+            
+            // Perbarui tampilan
+            loadProducts();
+            
+            alert('Produk berhasil diperbarui');
+        };
+        
+        // Fungsi untuk menghapus produk
+        window.deleteProduct = function(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                return;
+            }
+            
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const filteredProducts = products.filter(p => p.id !== id);
+            
+            localStorage.setItem('products', JSON.stringify(filteredProducts));
+            
+            // Perbarui tampilan
+            loadProducts();
+            
+            alert('Produk berhasil dihapus');
+        };
+        
+        // Fungsi untuk memuat riwayat transaksi
+        window.loadOrderHistory = function() {
+            const orderTable = document.getElementById('order-history');
+            if (!orderTable) return;
+            
+            const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
+            
+            if (orderHistory.length === 0) {
+                orderTable.innerHTML = '<tr><td colspan="6">Belum ada riwayat transaksi</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            orderHistory.forEach(order => {
+                const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                
+                html += `
+                    <tr>
+                        <td>#${String(order.id).slice(-6)}</td>
+                        <td>${new Date(order.date).toLocaleString()}</td>
+                        <td>${order.customerName || 'Tidak ada nama'}</td>
+                        <td>${totalItems} item</td>
+                        <td>Rp ${order.total.toLocaleString('id-ID')}</td>
+                        <td>
+                            <button class="btn-view" onclick="viewOrderDetails(${order.id})">Lihat</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            orderTable.innerHTML = html;
+        };
+        
+        // Fungsi untuk melihat detail pesanan
+        window.viewOrderDetails = function(orderId) {
+            const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
+            const order = orderHistory.find(o => o.id === orderId);
+            
+            if (!order) {
+                alert('Pesanan tidak ditemukan');
+                return;
+            }
+            
+            let details = `ID Pesanan: #${String(order.id).slice(-6)}\n`;
+            details += `Tanggal: ${new Date(order.date).toLocaleString()}\n`;
+            details += `Nama Pelanggan: ${order.customerName || 'Tidak ada nama'}\n\n`;
+            details += 'Daftar Produk:\n';
+            
+            order.items.forEach(item => {
+                details += `- ${item.name} (${item.quantity} x Rp ${item.price.toLocaleString('id-ID')})\n`;
+            });
+            
+            details += `\nTotal: Rp ${order.total.toLocaleString('id-ID')}`;
+            
+            alert(details);
+        };
+    </script>
+</body>
+</html>
