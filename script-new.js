@@ -3,19 +3,61 @@ let products = [];
 let cart = [];
 let orderHistory = [];
 
+// Fungsi untuk membuat placeholder gambar SVG
+const createPlaceholderImage = (text) => {
+    const displayText = text ? encodeURIComponent(text) : 'No+Image';
+    return `data:image/svg+xml;charset=UTF-8,%3Csvg width="300" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" preserveAspectRatio="none"%3E%3Crect width="300" height="200" fill="%23f0f0f0"%3E%3C/rect%3E%3Ctext x="50%25" y="50%25" fill="%23999" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" dy=".3em"%3E${displayText}%3C/text%3E%3C/svg%3E`;
+};
+
 // Fungsi untuk memuat data dari localStorage
 function loadData() {
     products = JSON.parse(localStorage.getItem('products')) || [];
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
     
+    // Perbarui produk yang ada untuk memastikan tidak ada yang menggunakan placeholder.com
+    let needsUpdate = false;
+    products = products.map(product => {
+        if (!product.image || product.image.includes('via.placeholder.com') || product.image.includes('placeholder.com')) {
+            needsUpdate = true;
+            return {
+                ...product,
+                image: createPlaceholderImage(product.name)
+            };
+        }
+        return product;
+    });
+    
     // Inisialisasi data default jika kosong
     if (products.length === 0) {
         products = [
-            { id: 1, name: 'Semen Tiga Roda 40kg', price: 65000, stock: 100, image: 'https://via.placeholder.com/300x200?text=Semen+Tiga+Roda' },
-            { id: 2, name: 'Bata Merah', price: 700, stock: 5000, image: 'https://via.placeholder.com/300x200?text=Bata+Merah' },
-            { id: 3, name: 'Cat Tembok Vinilex', price: 125000, stock: 30, image: 'https://via.placeholder.com/300x200?cat=Vinilex' }
+            { 
+                id: 1, 
+                name: 'Semen Tiga Roda 40kg', 
+                price: 65000, 
+                stock: 100, 
+                image: createPlaceholderImage('Semen Tiga Roda')
+            },
+            { 
+                id: 2, 
+                name: 'Bata Merah', 
+                price: 700, 
+                stock: 5000, 
+                image: createPlaceholderImage('Bata Merah')
+            },
+            { 
+                id: 3, 
+                name: 'Cat Tembok Vinilex', 
+                price: 125000, 
+                stock: 30, 
+                image: createPlaceholderImage('Cat Tembok Vinilex')
+            }
         ];
+        needsUpdate = true;
+    }
+    
+    // Simpan kembali jika ada perubahan
+    if (needsUpdate) {
         saveData();
     }
     
@@ -52,7 +94,7 @@ function displayProducts(productsToShow = products) {
     productsToShow.forEach(product => {
         html += `
             <div class="produk-item">
-                <img src="${product.image || 'https://via.placeholder.com/300x200?text=Produk'}" alt="${product.name}">
+                <img src="${product.image || createPlaceholderImage(product.name || 'Produk')}" alt="${product.name}">
                 <h3>${product.name}</h3>
                 <p class="harga">Rp ${product.price.toLocaleString('id-ID')}</p>
                 <p class="stok">Stok: ${product.stock}</p>
@@ -100,7 +142,8 @@ function addNewProduct(event) {
     const name = document.getElementById('product-name').value.trim();
     const price = parseInt(document.getElementById('product-price').value) || 0;
     const stock = parseInt(document.getElementById('product-stock').value) || 0;
-    const image = document.getElementById('product-image').value.trim() || 'https://via.placeholder.com/300x200?text=Produk';
+    const defaultImage = createPlaceholderImage('Produk');
+    const image = document.getElementById('product-image').value.trim() || defaultImage;
     
     if (!name || price <= 0 || stock < 0) {
         alert('Mohon isi data dengan benar');

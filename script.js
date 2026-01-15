@@ -10,34 +10,197 @@ let cart = [];
 // Array untuk menyimpan riwayat transaksi
 let orderHistory = [];
 
+
 /* ============================================
    FUNGSI LOAD DATA
    ============================================ 
    Memuat data dari localStorage dan inisialisasi data default
    ============================================ */
 function loadData() {
+    // Fungsi untuk membuat placeholder gambar SVG
+    const createPlaceholderImage = (text) => {
+        const displayText = text ? encodeURIComponent(text) : 'No+Image';
+        return `data:image/svg+xml;charset=UTF-8,%3Csvg width="300" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" preserveAspectRatio="none"%3E%3Crect width="300" height="200" fill="%23f0f0f0"%3E%3C/rect%3E%3Ctext x="50%25" y="50%25" fill="%23999" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" dy=".3em"%3E${displayText}%3C/text%3E%3C/svg%3E`;
+    };
+
+    // Fungsi untuk memuat data dari localStorage
     products = JSON.parse(localStorage.getItem('products')) || [];
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
     
+    // Perbarui produk yang ada untuk memastikan tidak ada yang menggunakan placeholder.com
+    let needsUpdate = false;
+    products = products.map(product => {
+        if (!product.image || product.image.includes('via.placeholder.com') || product.image.includes('placeholder.com')) {
+            needsUpdate = true;
+            return {
+                ...product,
+                image: createPlaceholderImage(product.name)
+            };
+        }
+        return product;
+    });
+    
     // Inisialisasi data default jika kosong
     if (products.length === 0) {
+        // Data produk default
         products = [
-            { id: 1, name: 'Semen Tiga Roda 40kg', price: 65000, stock: 100, image: 'https://via.placeholder.com/300x200?text=Semen+Tiga+Roda' },
-            { id: 2, name: 'Bata Merah', price: 700, stock: 5000, image: 'https://via.placeholder.com/300x200?text=Bata+Merah' },
-            { id: 3, name: 'Cat Tembok Vinilex', price: 125000, stock: 30, image: 'https://via.placeholder.com/300x200?cat=Vinilex' }
+            { 
+                id: 1, 
+                name: 'Semen Tiga Roda 40kg', 
+                price: 65000, 
+                stock: 100, 
+                image: createPlaceholderImage('Semen Tiga Roda')
+            },
+            { 
+                id: 2, 
+                name: 'Cat Tembok Avian', 
+                price: 250000, 
+                stock: 50, 
+                image: createPlaceholderImage('Cat Tembok Avian')
+            },
+            { 
+                id: 3, 
+                name: 'Paku Baja 2 inch', 
+                price: 5000, 
+                stock: 200, 
+                image: createPlaceholderImage('Paku Baja 2 inch')
+            }
         ];
+        needsUpdate = true;
+    }
+    
+    // Simpan kembali jika ada perubahan
+    if (needsUpdate) {
         saveData();
     }
     
-    // Perbarui tampilan
-    if (window.location.pathname.includes('admin.html')) {
-        displayAdminProducts();
-    } else {
-        displayProducts();
+    // Muat informasi kontak
+    loadContactInfo();
+    
+    // Update tampilan keranjang
+    updateCartCount();
+}
+
+// Fungsi untuk memuat informasi kontak
+function loadContactInfo() {
+    console.log('Memuat informasi kontak...');
+    
+    // Data default
+    const defaultContact = {
+        phone: '+62 123 4567 8900',
+        address: 'Jl. Contoh No. 123, Kota Contoh',
+        email: 'info@tokobangunan.com',
+        hours: 'Senin - Jumat: 08:00 - 17:00, Sabtu: 08:00 - 15:00',
+        maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12345!2d106.123456!3d-6.123456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMDcjMjQuNCJTIDEwNsKwMDcjMjQuNCJF!5e0!3m2!1sen!2sid!4v1234567890123!5m2!1sen!2sid'
+    };
+
+    // Coba ambil dari localStorage
+    let contactInfo;
+    try {
+        const stored = localStorage.getItem('contactInfo');
+        contactInfo = stored ? JSON.parse(stored) : {};
+        console.log('Data kontak yang dimuat:', contactInfo);
+    } catch (e) {
+        console.error('Gagal memuat data kontak:', e);
+        contactInfo = {};
+    }
+
+    // Gabungkan dengan data default
+    contactInfo = { ...defaultContact, ...contactInfo };
+    console.log('Data kontak setelah digabung:', contactInfo);
+
+    // Isi form kontak di admin
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        console.log('Mengisi form kontak admin...');
+        const phoneInput = document.getElementById('contact-phone');
+        const addressInput = document.getElementById('contact-address');
+        const emailInput = document.getElementById('contact-email');
+        const hoursInput = document.getElementById('contact-hours');
+        const mapsInput = document.getElementById('contact-maps');
+        
+        if (phoneInput) phoneInput.value = contactInfo.phone || '';
+        if (addressInput) addressInput.value = contactInfo.address || '';
+        if (emailInput) emailInput.value = contactInfo.email || '';
+        if (hoursInput) hoursInput.value = contactInfo.hours || '';
+        if (mapsInput) mapsInput.value = contactInfo.maps || '';
+        
+        console.log('Form kontak berhasil diisi');
+    }
+
+    // Update tampilan kontak di halaman depan
+    updateContactDisplay(contactInfo);
+    
+    return contactInfo;
+}
+
+// Fungsi untuk memperbarui tampilan kontak di halaman depan
+function updateContactDisplay(contactInfo) {
+    console.log('Memperbarui tampilan kontak:', contactInfo);
+    
+    // Update nomor telepon
+    const phoneEl = document.getElementById('contact-phone');
+    if (phoneEl) {
+        phoneEl.textContent = contactInfo.phone || 'Belum diisi';
+        phoneEl.parentElement.style.display = 'flex';
+    }
+
+    // Update email
+    const emailEl = document.getElementById('contact-email');
+    if (emailEl) {
+        emailEl.textContent = contactInfo.email || 'Belum diisi';
+        emailEl.parentElement.style.display = 'flex';
     }
     
-    updateCartCount();
+    // Update alamat
+    const addressEl = document.getElementById('contact-address');
+    if (addressEl) {
+        addressEl.textContent = contactInfo.address || 'Belum diisi';
+        addressEl.parentElement.style.display = 'flex';
+    }
+    
+    // Update jam operasional
+    const hoursEl = document.getElementById('contact-hours');
+    if (hoursEl) {
+        hoursEl.textContent = contactInfo.hours || 'Belum diisi';
+        hoursEl.parentElement.style.display = 'flex';
+    }
+
+    // Update peta jika ada
+    const mapContainer = document.getElementById('map-container');
+    const mapIframe = document.getElementById('contact-map');
+    
+    if (mapContainer && mapIframe) {
+        if (contactInfo.maps && contactInfo.maps.trim()) {
+            let mapsUrl = contactInfo.maps.trim();
+            
+            // Pastikan URL memiliki protokol
+            if (!/^https?:\/\//i.test(mapsUrl)) {
+                mapsUrl = 'https://' + mapsUrl;
+            }
+            
+            console.log('Mencoba menampilkan peta dengan URL:', mapsUrl);
+            
+            try {
+                // Validasi URL
+                new URL(mapsUrl);
+                
+                // Set iframe src
+                mapIframe.src = mapsUrl;
+                mapContainer.style.display = 'block';
+                console.log('Peta berhasil ditampilkan');
+            } catch (e) {
+                console.error('URL peta tidak valid:', e);
+                mapContainer.style.display = 'none';
+            }
+        } else {
+            console.log('URL peta kosong');
+            mapContainer.style.display = 'none';
+        }
+    } else {
+        console.log('Elemen peta tidak ditemukan');
+    }
 }
 
 // Fungsi untuk menyimpan data ke localStorage
@@ -45,6 +208,66 @@ function saveData() {
     localStorage.setItem('products', JSON.stringify(products));
     localStorage.setItem('cart', JSON.stringify(cart));
     localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+    
+    // Cek apakah elemen form kontak ada di halaman
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        const contactInfo = {
+            phone: document.getElementById('contact-phone')?.value || '',
+            address: document.getElementById('contact-address')?.value || '',
+            email: document.getElementById('contact-email')?.value || '',
+            hours: document.getElementById('contact-hours')?.value || '',
+            maps: document.getElementById('contact-maps')?.value || ''
+        };
+        localStorage.setItem('contactInfo', JSON.stringify(contactInfo));
+        console.log('Data kontak disimpan:', contactInfo);
+    }
+}
+
+// Fungsi untuk menangani submit form kontak admin
+function handleAdminContactSubmit(e) {
+    e.preventDefault();
+    console.log('Form kontak disubmit');
+    
+    // Dapatkan nilai dari form
+    const phoneInput = document.getElementById('contact-phone');
+    const addressInput = document.getElementById('contact-address');
+    const emailInput = document.getElementById('contact-email');
+    const hoursInput = document.getElementById('contact-hours');
+    const mapsInput = document.getElementById('contact-maps');
+    
+    if (!phoneInput || !addressInput || !emailInput || !hoursInput) {
+        console.error('Ada elemen form yang tidak ditemukan');
+        showNotification('Terjadi kesalahan saat menyimpan data', 'error');
+        return false;
+    }
+    
+    const contactInfo = {
+        phone: phoneInput.value.trim(),
+        address: addressInput.value.trim(),
+        email: emailInput.value.trim(),
+        hours: hoursInput.value.trim(),
+        maps: mapsInput ? mapsInput.value.trim() : ''
+    };
+    
+    console.log('Data yang akan disimpan:', contactInfo);
+    
+    try {
+        // Simpan ke localStorage
+        localStorage.setItem('contactInfo', JSON.stringify(contactInfo));
+        console.log('Data berhasil disimpan di localStorage');
+        
+        // Perbarui tampilan
+        updateContactDisplay(contactInfo);
+        
+        // Tampilkan notifikasi
+        showNotification('Informasi kontak berhasil disimpan', 'success');
+    } catch (error) {
+        console.error('Gagal menyimpan data:', error);
+        showNotification('Gagal menyimpan data: ' + error.message, 'error');
+    }
+    
+    return false;
 }
 
 /* ============================================
@@ -65,10 +288,17 @@ function displayProducts(productsToShow = products) {
     }
     
     let html = '';
+    const createPlaceholderImage = (text) => {
+        const displayText = text ? encodeURIComponent(text) : 'No+Image';
+        return `data:image/svg+xml;charset=UTF-8,%3Csvg width="300" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" preserveAspectRatio="none"%3E%3Crect width="300" height="200" fill="%23f0f0f0"%3E%3C/rect%3E%3Ctext x="50%25" y="50%25" fill="%23999" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" dy=".3em"%3E${displayText}%3C/text%3E%3C/svg%3E`;
+    };
+    
     productsToShow.forEach(product => {
+        const placeholderImage = createPlaceholderImage(product.name);
+        
         html += `
             <div class="produk-item">
-                <img src="${product.image || 'https://via.placeholder.com/300x200?text=Produk'}" alt="${product.name}">
+                <img src="${product.image || placeholderImage}" alt="${product.name}">
                 <h3>${product.name}</h3>
                 <p class="harga">Rp ${product.price.toLocaleString('id-ID')}</p>
                 <p class="stok">Stok: ${product.stock}</p>
@@ -116,7 +346,9 @@ function addNewProduct(event) {
     const name = document.getElementById('product-name').value.trim();
     const price = parseInt(document.getElementById('product-price').value) || 0;
     const stock = parseInt(document.getElementById('product-stock').value) || 0;
-    const image = document.getElementById('product-image').value.trim() || 'https://via.placeholder.com/300x200?text=Produk';
+    const imageInput = document.getElementById('product-image').value.trim();
+    const defaultImage = 'data:image/svg+xml;charset=UTF-8,%3Csvg width="300" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" preserveAspectRatio="none"%3E%3Crect width="300" height="200" fill="%23f0f0f0"%3E%3C/rect%3E%3Ctext x="50%25" y="50%25" fill="%23999" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" dy=".3em"%3EProduk%3C/text%3E%3C/svg%3E';
+    const image = imageInput || defaultImage;
     
     if (!name || price <= 0 || stock < 0) {
         alert('Mohon isi data dengan benar');
@@ -411,11 +643,113 @@ function updateCartCount() {
 /* ============================================
    INISIALISASI SAAT DOKUMEN SIAP
    ============================================ */
-document.addEventListener('DOMContentLoaded', function() {
+// Fungsi untuk menangani submit form tentang kami
+function handleAboutFormSubmit(e) {
+    e.preventDefault();
+    
+    const aboutContent = document.getElementById('about-content').value;
+    if (aboutContent) {
+        localStorage.setItem('aboutContent', aboutContent);
+        showNotification('Tentang Kami berhasil diperbarui', 'success');
+    }
+    
+    return false;
+}
+
+// Fungsi untuk inisialisasi halaman
+function initializePage() {
+    console.log('Memulai inisialisasi halaman...');
+    
     // Muat data
     loadData();
     
-    // Inisialisasi tab (untuk halaman admin)
+    // Cek apakah ini halaman admin atau halaman utama
+    const isAdminPage = window.location.pathname.includes('admin.html');
+    
+    if (isAdminPage) {
+        console.log('Ini adalah halaman admin');
+        
+        // Inisialisasi form kontak di admin
+        const adminContactForm = document.getElementById('contact-form');
+        if (adminContactForm) {
+            console.log('Form kontak admin ditemukan, menambahkan event listener...');
+            adminContactForm.addEventListener('submit', handleAdminContactSubmit);
+            
+            // Inisialisasi form tentang kami
+            const aboutForm = document.getElementById('about-form');
+            if (aboutForm) {
+                console.log('Form tentang kami ditemukan, menambahkan event listener...');
+                aboutForm.addEventListener('submit', handleAboutFormSubmit);
+                
+                // Muat konten tentang kami yang sudah ada
+                const savedAbout = localStorage.getItem('aboutContent');
+                if (savedAbout) {
+                    console.log('Memuat konten tentang kami dari localStorage');
+                    document.getElementById('about-content').value = savedAbout;
+                } else {
+                    console.log('Tidak ada konten tentang kami yang tersimpan');
+                }
+            } else {
+                console.log('Form tentang kami tidak ditemukan');
+            }
+            
+            // Muat data kontak untuk form admin
+            console.log('Memuat data kontak untuk form admin...');
+            loadContactInfo();
+        }
+        
+        // Inisialisasi tab
+        initTabs();
+        
+        // Tampilkan produk di admin
+        displayAdminProducts();
+    } else {
+        console.log('Ini adalah halaman utama');
+        
+        // Muat data kontak untuk ditampilkan
+        console.log('Memuat data kontak untuk ditampilkan...');
+        loadContactInfo();
+        
+        // Muat konten tentang kami di halaman depan
+        const aboutContent = document.getElementById('about-content');
+        if (aboutContent) {
+            const savedAbout = localStorage.getItem('aboutContent');
+            if (savedAbout) {
+                aboutContent.innerHTML = savedAbout;
+            } else {
+                aboutContent.innerHTML = '<p>Selamat datang di Toko Bangunan Roedie. Kami menyediakan berbagai macam bahan bangunan berkualitas.</p>';
+            }
+        }
+        
+        // Tampilkan produk di halaman utama
+        displayProducts();
+    }
+    
+    // Inisialisasi komponen umum
+    initCommonComponents();
+}
+
+// Fungsi untuk inisialisasi komponen yang ada di kedua halaman
+function initCommonComponents() {
+    // Inisialisasi pencarian
+    const searchBtn = document.getElementById('search-btn');
+    const searchInput = document.getElementById('search-input');
+    
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', () => {
+            searchProducts(searchInput.value);
+        });
+        
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                searchProducts(searchInput.value);
+            }
+        });
+    }
+}
+
+// Fungsi untuk inisialisasi tab
+function initTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -446,6 +780,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Aktifkan tab pertama secara default jika ada
+    const firstTab = document.querySelector('.tab-btn');
+    if (firstTab) firstTab.click();
+}
+
+// Inisialisasi saat dokumen siap
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dokumen siap, memulai inisialisasi...');
+    initializePage();
     
     // Inisialisasi form tambah produk (untuk halaman admin)
     const addProductForm = document.getElementById('add-product-form');
@@ -550,6 +894,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Event listener untuk form kontak admin (sudah dipindahkan ke atas)
+
     // Inisialisasi modal keranjang
     const cartModal = document.getElementById('cart-modal');
     const cartIcon = document.querySelector('.cart-icon');
@@ -607,6 +953,7 @@ function loadOrderHistory() {
     container.innerHTML = html;
 }
 
+
 // Fungsi untuk melihat detail pesanan
 function viewOrderDetails(orderId) {
     const order = orderHistory.find(o => o.id === orderId);
@@ -627,6 +974,134 @@ function viewOrderDetails(orderId) {
     details += '============================';
     
     alert(details);
+}
+
+// Inisialisasi form tambah produk (untuk halaman admin)
+const addProductForm = document.getElementById('add-product-form');
+if (addProductForm) {
+    addProductForm.addEventListener('submit', addNewProduct);
+}
+
+// Inisialisasi pencarian
+const searchBtn = document.getElementById('search-btn');
+const searchInput = document.getElementById('search-input');
+
+if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', () => {
+        searchProducts(searchInput.value);
+    });
+    
+    searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            searchProducts(searchInput.value);
+        }
+    });
+}
+
+// Inisialisasi tombol kosongkan keranjang
+const clearCartBtn = document.getElementById('clear-cart');
+if (clearCartBtn) {
+    clearCartBtn.addEventListener('click', () => {
+        if (confirm('Apakah Anda yakin ingin mengosongkan keranjang?')) {
+            // Kembalikan semua stok
+            cart.forEach(item => {
+                const product = products.find(p => p.id === item.id);
+                if (product) {
+                    product.stock += item.quantity;
+                }
+            });
+            
+            // Kosongkan keranjang
+            cart = [];
+            saveData();
+            
+            // Perbarui tampilan
+            displayCart();
+            updateCartCount();
+            showNotification('Keranjang berhasil dikosongkan');
+        }
+    });
+}
+
+// Inisialisasi tombol checkout
+const checkoutBtn = document.getElementById('checkout-btn');
+if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', () => {
+        if (cart.length === 0) {
+            showNotification('Keranjang kosong', 'error');
+            return;
+        }
+        
+        const customerName = prompt('Masukkan nama Anda:');
+        if (!customerName) return;
+        
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        // Buat pesanan baru
+        const order = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            customerName,
+            items: [...cart],
+            total,
+            status: 'completed'
+        };
+        
+        // Tambahkan ke riwayat
+        orderHistory.unshift(order);
+        
+        // Kosongkan keranjang
+        cart = [];
+        
+        // Simpan perubahan
+        saveData();
+        
+        // Perbarui tampilan
+        displayCart();
+        updateCartCount();
+        
+        // Tampilkan struk
+        let receipt = `=== STRUK PEMBAYARAN ===\n`;
+        receipt += `Tanggal: ${new Date(order.date).toLocaleString()}\n`;
+        receipt += `Nama: ${customerName}\n`;
+        receipt += '----------------------------\n';
+        
+        order.items.forEach(item => {
+            receipt += `${item.name} x${item.quantity} = Rp ${(item.price * item.quantity).toLocaleString('id-ID')}\n`;
+        });
+        
+        receipt += '----------------------------\n';
+        receipt += `Total: Rp ${total.toLocaleString('id-ID')}\n`;
+        receipt += '============================';
+        
+        alert(receipt);
+        showNotification('Pembayaran berhasil', 'success');
+    });
+}
+
+// Inisialisasi modal keranjang
+const cartModal = document.getElementById('cart-modal');
+const cartIcon = document.querySelector('.cart-icon');
+const closeBtn = document.querySelector('.close');
+
+if (cartModal && cartIcon && closeBtn) {
+    // Buka modal saat ikon keranjang diklik
+    cartIcon.addEventListener('click', () => {
+        cartModal.style.display = 'block';
+        displayCart();
+    });
+    
+    // Tutup modal saat tombol tutup diklik
+    closeBtn.addEventListener('click', () => {
+        cartModal.style.display = 'none';
+    });
+    
+    // Tutup modal saat klik di luar modal
+    window.addEventListener('click', (e) => {
+        if (e.target === cartModal) {
+            cartModal.style.display = 'none';
+        }
+    });
 }
 
 /* ============================================

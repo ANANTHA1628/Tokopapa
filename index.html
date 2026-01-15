@@ -13,10 +13,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toko Bangunan Roedie</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Menggunakan Font Awesome untuk ikon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Menggunakan Font Awesome untuk ikon (duplikat, mungkin perlu dihapus) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Menggunakan Font Awesome untuk ikon dengan fallback -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          crossorigin="anonymous"
+          onerror="console.warn('Font Awesome failed to load, using fallback icons');">
+    <style>
+        /* Fallback icons if Font Awesome fails to load */
+        .fa-shopping-cart::before { content: '🛒'; }
+        .fa-search::before { content: '🔍'; }
+        .fa-store-alt::before { content: '🏪'; }
+        .fa-phone::before { content: '📞'; }
+        .fa-envelope::before { content: '✉️'; }
+        .fa-map-marker-alt::before { content: '📍'; }
+        .fa-clock::before { content: '🕒'; }
+    </style>
 </head>
 <body>
     <!-- ===== BAGIAN HEADER ===== -->
@@ -34,11 +45,12 @@
     <!-- ===== NAVIGASI UTAMA ===== -->
     <nav>
         <div class="container">
-            <a href="index.html" class="active">Beranda</a>
-            <a href="#produk">Produk</a>
-            <a href="#tentang">Tentang Kami</a>
-            <a href="#kontak">Kontak</a>
-            <a href="admin.html" class="admin-link">Admin</a>
+            <div class="nav-tabs">
+                <a href="index.html" class="nav-tab active">Beranda</a>
+                <a href="#produk" class="nav-tab">Produk</a>
+                <a href="#tentang" class="nav-tab">Tentang Kami</a>
+                <a href="admin.html" class="nav-tab admin-tab">Admin</a>
+            </div>
         </div>
     </nav>
 
@@ -64,32 +76,7 @@
             </div>
         </section>
 
-        <!-- ===== BAGIAN KONTAK ===== -->
-        <section id="kontak" class="contact-section">
-            <h2><i class="fas fa-envelope" style="margin-right: 10px; color: #4a6bff;"></i>Hubungi Kami</h2>
-            <div class="contact-info" id="contact-info">
-                <!-- Konten akan dimuat melalui JavaScript -->
-            </div>
-            
-            <div class="contact-form" style="max-width: 600px; margin: 30px auto;">
-                <h3>Kirim Pesan</h3>
-                <form id="contact-form">
-                    <div class="form-group">
-                        <label for="name">Nama:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Pesan:</label>
-                        <textarea id="message" name="message" rows="5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn">Kirim Pesan</button>
-                </form>
-            </div>
-        </section>
+        <!-- Bagian kontak dihapus karena sudah dipindah ke footer -->
 
         <!-- Modal Keranjang -->
         <div id="cart-modal" class="modal">
@@ -112,73 +99,86 @@
 
     <!-- ===== BAGIAN FOOTER ===== -->
     <footer>
+        <div class="footer-wave">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+            </svg>
+        </div>
+        
         <div class="container">
-            <p>&copy; 2025 Toko Bangunan Roedie. Semua hak dilindungi.</p>
+            <div class="footer-content">
+                <!-- Contact Info Section -->
+                <div class="footer-section">
+                    <h3>Kontak Kami</h3>
+                    <div class="contact-info">
+                        <p>
+                            <i class="fas fa-phone"></i>
+                            <span>
+                                <strong>Telepon</strong><br>
+                                <span id="contact-phone">Loading...</span>
+                            </span>
+                        </p>
+                        <p>
+                            <i class="fas fa-envelope"></i>
+                            <span>
+                                <strong>Email</strong><br>
+                                <span id="contact-email">Loading...</span>
+                            </span>
+                        </p>
+                        <p>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>
+                                <strong>Alamat</strong><br>
+                                <span id="contact-address" style="display: inline-block; max-width: 220px;">Loading...</span>
+                            </span>
+                        </p>
+                        <p>
+                            <i class="fas fa-clock"></i>
+                            <span>
+                                <strong>Jam Operasional</strong><br>
+                                <span id="contact-hours">Loading...</span>
+                            </span>
+                        </p>
+                    </div>
+                    
+                    <div class="social-links">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3>Tautan Cepat</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Beranda</a></li>
+                        <li><a href="#produk">Produk</a></li>
+                        <li><a href="#tentang">Tentang Kami</a></li>
+                        <li><a href="#kontak">Kontak</a></li>
+                        <li><a href="admin.html">Admin</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Google Maps -->
+                <div class="footer-section">
+                    <h3>Lokasi Kami</h3>
+                    <div class="map-container">
+                        <iframe id="contact-map" width="100%" height="100%" style="border: none;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div class="footer-bottom">
+                &copy; 2023 Toko Bangunan Roedie. All rights reserved.
+            </div>
         </div>
     </footer>
 
     <!-- ===== JAVASCRIPT ===== -->
-    <script>
-        // Load about and contact content
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load about content
-            const savedAbout = localStorage.getItem('aboutContent');
-            const aboutContent = document.getElementById('about-content');
-            if (savedAbout && aboutContent) {
-                aboutContent.innerHTML = savedAbout;
-            } else {
-                aboutContent.innerHTML = '<p>Selamat datang di Toko Bangunan Roedie. Kami menyediakan berbagai macam bahan bangunan berkualitas.</p>';
-            }
+    <!-- Script untuk memuat konten akan ditangani oleh script.js -->
 
-            // Load contact info
-            const savedContact = localStorage.getItem('contactData');
-            const contactInfo = document.getElementById('contact-info');
-            if (savedContact && contactInfo) {
-                const contactData = JSON.parse(savedContact);
-                contactInfo.innerHTML = `
-                    <div class="contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div>
-                            <strong>Alamat</strong>
-                            <p>${contactData.address || 'Jl. Contoh No. 123, Kota Anda'}</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-phone"></i>
-                        <div>
-                            <strong>Telepon</strong>
-                            <p>${contactData.phone || '(021) 1234567'}</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <div>
-                            <strong>Email</strong>
-                            <p>${contactData.email || 'info@tokobangunanroedie.com'}</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-clock"></i>
-                        <div>
-                            <strong>Jam Operasional</strong>
-                            <p>${contactData.hours || 'Senin - Jumat: 08:00 - 17:00'}</p>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Handle contact form submission
-            const contactForm = document.getElementById('contact-form');
-            if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    // Here you would typically send the form data to a server
-                    alert('Terima kasih atas pesan Anda. Kami akan segera menghubungi Anda kembali.');
-                    contactForm.reset();
-                });
-            }
-        });
-    </script>
     <!-- ===== STYLE TAMBAHAN ===== -->
     <!-- Catatan: Style sebaiknya dipindahkan ke file style.css -->
     <style>

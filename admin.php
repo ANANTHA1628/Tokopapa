@@ -17,7 +17,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['tambah_produk'])) {
     $nama = $_POST['nama'];
     $harga = $_POST['harga'];
     $stok = $_POST['stok'];
-    $gambar = $_POST['gambar'] ?: 'https://via.placeholder.com/150';
+    // Default placeholder SVG
+    $defaultImage = 'data:image/svg+xml;charset=UTF-8,%3Csvg width="150" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" preserveAspectRatio="none"%3E%3Crect width="150" height="150" fill="%23f0f0f0"%3E%3C/rect%3E%3Ctext x="50%25" y="50%25" fill="%23999" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" dy=".3em"%3EProduk%3C/text%3E%3C/svg%3E';
+    $gambar = !empty($_POST['gambar']) ? $_POST['gambar'] : $defaultImage;
     
     $sql = "INSERT INTO produk (nama, harga, stok, gambar) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);

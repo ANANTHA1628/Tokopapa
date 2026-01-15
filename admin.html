@@ -293,31 +293,43 @@
                     </div>
 
                     <div class="admin-form" style="margin-top: 30px;">
-                        <h3>Kontak</h3>
+                        <h3>Informasi Kontak</h3>
+                        <p>Informasi ini akan ditampilkan di halaman depan pada bagian Hubungi Kami.</p>
                         <form id="contact-form">
                             <div class="form-group">
-                                <label for="contact-address">Alamat:</label>
-                                <input type="text" id="contact-address" name="contact-address" required>
+                                <label for="contact-phone">Nomor Telepon:</label>
+                                <input type="tel" id="contact-phone" name="contact-phone" placeholder="Contoh: +62 123 4567 8900" required>
+                                <small class="form-text text-muted">Format: +62 xxx xxxx xxxx</small>
                             </div>
                             <div class="form-group">
-                                <label for="contact-phone">Telepon:</label>
-                                <input type="tel" id="contact-phone" name="contact-phone" required>
+                                <label for="contact-address">Alamat Lengkap:</label>
+                                <textarea id="contact-address" name="contact-address" rows="3" required></textarea>
+                                <small class="form-text text-muted">Alamat lengkap toko</small>
                             </div>
                             <div class="form-group">
                                 <label for="contact-email">Email:</label>
-                                <input type="email" id="contact-email" name="contact-email" required>
+                                <input type="email" id="contact-email" name="contact-email" placeholder="contoh@tokobangunan.com" required>
                             </div>
                             <div class="form-group">
                                 <label for="contact-hours">Jam Operasional:</label>
                                 <input type="text" id="contact-hours" name="contact-hours" placeholder="Contoh: Senin - Jumat, 08:00 - 17:00" required>
+                                <small class="form-text text-muted">Contoh: Senin - Jumat: 08:00 - 17:00, Sabtu: 08:00 - 15:00</small>
                             </div>
-                            <button type="submit" class="btn">Simpan Perubahan</button>
+                            <div class="form-group">
+                                <label for="contact-maps">Link Google Maps (opsional):</label>
+                                <input type="url" id="contact-maps" name="contact-maps" placeholder="https://maps.google.com/...">
+                                <small class="form-text text-muted">Link Google Maps untuk menampilkan peta lokasi</small>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadContactInfo()">Muat Ulang</button>
+                            </div>
                         </form>
                     </div>
                 </section>
             </div>
 
-            <!-- Tab Riwayat Transaksi -->
+<!-- Tab Riwayat Transaksi -->
             <div id="riwayat-tab" class="tab-pane">
                 <div class="admin-form">
                     <h3>Riwayat Transaksi</h3>
@@ -388,243 +400,7 @@
         </div>
     </footer>
 
-    <!-- Load script.js terlebih dahulu -->
     <!-- ===== JAVASCRIPT ===== -->
-    <script>
-    /* ===========================================
-       INISIALISASI FUNGSI GLOBAL
-       =========================================== */
-        // Pastikan fungsi-fungsi yang diperlukan tersedia di global scope
-        window.loadProducts = function() {
-            console.log('Memuat produk...');
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const productsList = document.getElementById('products-list');
-            
-            if (!productsList) {
-                console.error('Element dengan id "products-list" tidak ditemukan');
-                return;
-            }
-            
-            if (products.length === 0) {
-                productsList.innerHTML = '<tr><td colspan="5" class="text-center">Tidak ada produk</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            products.forEach((product, index) => {
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${product.name || 'N/A'}</td>
-                        <td>Rp ${(product.price || 0).toLocaleString('id-ID')}</td>
-                        <td>${product.stock || 0}</td>
-                        <td>
-                            <button class="btn-edit" onclick="editProduct(${product.id})">Edit</button>
-                            <button class="btn-delete" onclick="deleteProduct(${product.id})">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            productsList.innerHTML = html;
-        };
-        
-        // Fungsi untuk menangani tab
-        function initTabs() {
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // Sembunyikan semua tab pane
-                    document.querySelectorAll('.tab-pane').forEach(pane => {
-                        pane.classList.remove('active');
-                    });
-                    
-                    // Nonaktifkan semua tombol tab
-                    tabButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    
-                    // Tampilkan tab yang dipilih
-                    const tabPane = document.getElementById(tabId + '-tab');
-                    if (tabPane) {
-                        tabPane.classList.add('active');
-                        this.classList.add('active');
-                        
-                        // Muat konten tab yang sesuai
-                        if (tabId === 'riwayat') {
-                            if (typeof loadOrderHistory === 'function') {
-                                loadOrderHistory();
-                            }
-                        } else if (tabId === 'produk') {
-                            loadProducts();
-                        }
-                    }
-                });
-            });
-            
-            // Aktifkan tab pertama
-            const firstTab = document.querySelector('.tab-btn');
-            if (firstTab) firstTab.click();
-        }
-        
-        /* ===========================================
-           INISIALISASI SAAT DOKUMEN SIAP
-           =========================================== */
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inisialisasi tab
-            initTabs();
-            
-            // Muat data produk
-            loadProducts();
-            
-            // Inisialisasi form tambah produk
-            const addProductForm = document.getElementById('add-product-form');
-            if (addProductForm) {
-                addProductForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const nameInput = document.getElementById('product-name');
-                    const priceInput = document.getElementById('product-price');
-                    const stockInput = document.getElementById('product-stock');
-                    const imageInput = document.getElementById('product-image');
-                    
-                    if (!nameInput.value || !priceInput.value || !stockInput.value) {
-                        alert('Mohon isi semua field yang diperlukan');
-                        return;
-                    }
-                    
-                    const products = JSON.parse(localStorage.getItem('products')) || [];
-                    
-                    const newProduct = {
-                        id: Date.now(),
-                        name: nameInput.value,
-                        price: parseInt(priceInput.value) || 0,
-                        stock: parseInt(stockInput.value) || 0,
-                        image: imageInput.value || 'https://via.placeholder.com/300x200?text=Produk'
-                    };
-                    
-                    products.push(newProduct);
-                    localStorage.setItem('products', JSON.stringify(products));
-                    
-                    // Reset form
-                    addProductForm.reset();
-                    
-                    // Perbarui tampilan
-                    loadProducts();
-                    
-                    alert('Produk berhasil ditambahkan');
-                });
-            }
-        });
-        
-        // Fungsi untuk mengedit produk
-        window.editProduct = function(id) {
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const product = products.find(p => p.id === id);
-            
-            if (!product) {
-                alert('Produk tidak ditemukan');
-                return;
-            }
-            
-            const newName = prompt('Nama Produk:', product.name);
-            if (newName === null) return;
-            
-            const newPrice = prompt('Harga:', product.price);
-            if (newPrice === null) return;
-            
-            const newStock = prompt('Stok:', product.stock);
-            if (newStock === null) return;
-            
-            // Update produk
-            product.name = newName;
-            product.price = parseInt(newPrice) || 0;
-            product.stock = parseInt(newStock) || 0;
-            
-            // Simpan perubahan
-            localStorage.setItem('products', JSON.stringify(products));
-            
-            // Perbarui tampilan
-            loadProducts();
-            
-            alert('Produk berhasil diperbarui');
-        };
-        
-        // Fungsi untuk menghapus produk
-        window.deleteProduct = function(id) {
-            if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-                return;
-            }
-            
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const filteredProducts = products.filter(p => p.id !== id);
-            
-            localStorage.setItem('products', JSON.stringify(filteredProducts));
-            
-            // Perbarui tampilan
-            loadProducts();
-            
-            alert('Produk berhasil dihapus');
-        };
-        
-        // Fungsi untuk memuat riwayat transaksi
-        window.loadOrderHistory = function() {
-            const orderTable = document.getElementById('order-history');
-            if (!orderTable) return;
-            
-            const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
-            
-            if (orderHistory.length === 0) {
-                orderTable.innerHTML = '<tr><td colspan="6">Belum ada riwayat transaksi</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            orderHistory.forEach(order => {
-                const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-                
-                html += `
-                    <tr>
-                        <td>#${String(order.id).slice(-6)}</td>
-                        <td>${new Date(order.date).toLocaleString()}</td>
-                        <td>${order.customerName || 'Tidak ada nama'}</td>
-                        <td>${totalItems} item</td>
-                        <td>Rp ${order.total.toLocaleString('id-ID')}</td>
-                        <td>
-                            <button class="btn-view" onclick="viewOrderDetails(${order.id})">Lihat</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            orderTable.innerHTML = html;
-        };
-        
-        // Fungsi untuk melihat detail pesanan
-        window.viewOrderDetails = function(orderId) {
-            const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
-            const order = orderHistory.find(o => o.id === orderId);
-            
-            if (!order) {
-                alert('Pesanan tidak ditemukan');
-                return;
-            }
-            
-            let details = `ID Pesanan: #${String(order.id).slice(-6)}\n`;
-            details += `Tanggal: ${new Date(order.date).toLocaleString()}\n`;
-            details += `Nama Pelanggan: ${order.customerName || 'Tidak ada nama'}\n\n`;
-            details += 'Daftar Produk:\n';
-            
-            order.items.forEach(item => {
-                details += `- ${item.name} (${item.quantity} x Rp ${item.price.toLocaleString('id-ID')})\n`;
-            });
-            
-            details += `\nTotal: Rp ${order.total.toLocaleString('id-ID')}`;
-            
-            alert(details);
-        };
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
